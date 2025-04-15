@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyRunnyApp</title>
+    <base href="/" />
+    <link href="css/app.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="app">
+      <h1>محرر الكود</h1>
+      <textarea
+        id="codeEditor"
+        rows="10"
+        cols="50"
+        placeholder="اكتب الكود هنا..."
+      ></textarea>
+      <br />
+      <button onclick="runCode()">تشغيل</button>
+      <pre id="output"></pre>
+    </div>
+
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+      let blazorStarted = false;
+      async function initializeBlazor() {
+        try {
+          await Blazor.start();
+          blazorStarted = true;
+          console.log("Blazor started successfully");
+        } catch (err) {
+          console.error("Failed to start Blazor:", err);
+        }
+      }
+      initializeBlazor();
+
+      async function runCode() {
+        if (!blazorStarted) {
+          document.getElementById("output").textContent =
+            "جاري تحميل التطبيق، برجاء الانتظار...";
+          await initializeBlazor();
+        }
+        try {
+          const code = document.getElementById("codeEditor").value;
+          console.log("Running code:", code);
+          const result = await DotNet.invokeMethodAsync(
+            "MyRunnyApp",
+            "RunCode",
+            code
+          );
+          console.log("Result:", result);
+          document.getElementById("output").textContent =
+            result.output || result.errors;
+        } catch (err) {
+          console.error("Error running code:", err);
+          document.getElementById("output").textContent =
+            "Error: " + err.message;
+        }
+      }
+    </script>
+  </body>
+</html>
